@@ -18,7 +18,8 @@ const request = chai.request(app);
 
 describe('Puppies DB /', () => {
   //start with clean slate, empty db
-  before(() => connection.db.dropDatabase());
+  //for mongoose, use dropDB directly on connection
+  before(() => connection.dropDatabase());
   
 
   function savePom(pom) {
