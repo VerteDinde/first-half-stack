@@ -3,12 +3,23 @@ const chaiHttp = require('chai-http');
 const assert = chai.assert;
 chai.use(chaiHttp);
 
-const app = require('../lib/app');
-const connect = require('../lib/helpers/connect');
+/* CONNECT TO DB */
+//Connect to the test DB
+process.env.MONGODB_URI = 'mongodb://localhost:27017/puppies-test';
+//Run the actual connext to DB
+require('../lib/connect');
+//Get reference to local connection, because we need to drop DB prior to test
+const connection = require('mongoose').connection;
 
+/* RUN OUR APP */
+const app = require('../lib/app');
+//let chai-http (via chai.request); chai doesn't have native request method
 const request = chai.request(app);
 
 describe('Puppies DB /', () => {
+  //start with clean slate, empty db
+  before(() => connection.db.dropDatabase());
+  
 
   function savePom(pom) {
     return request
@@ -37,7 +48,7 @@ describe('Puppies DB /', () => {
 
   describe('GET /', () => {
     it('find poms db', () => {
-      connect.db.collection('poms');
+      connection.db.collection('poms');
       return request
         .get('/puppies')
         .then(res => {
@@ -48,7 +59,7 @@ describe('Puppies DB /', () => {
     });
 
     it('finds a pom by id', () => {
-      connect.db.collection('poms');
+      connection.db.collection('poms');
       return request.get(`/puppies/:${gibbs._id}`)
         .then(res => res.body)
         .then(pom => assert.deepEqual(pom, gibbs));
